@@ -1,0 +1,5 @@
+numpy>=1.19.*
+pyomo>=6.*
+matplotlib
+build
+ipykernel
