@@ -9,7 +9,7 @@ BASE_PACKAGE = 'jobshop'
 
 setuptools.setup(
     name='jobshop',
-    version='0.0.1.dev3',
+    version='0.0.1.dev7',
     author='DigitalTech',
     author_email='bruscalia12@gmail.com',
     description='Pacote com implementações do jobshop problem',
