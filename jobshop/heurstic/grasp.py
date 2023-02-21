@@ -23,7 +23,7 @@ def simple_grasp(params: JobShopParams, n_iter=1000, alpha=0.8, seed=None):
     for _ in range(n_iter):
         
         graph = Graph(params.machines, params.jobs, params.p_times, params.seq)
-        semi_greedy_construction(graph, alpha=0.8)
+        semi_greedy_construction(graph, alpha=alpha)
         calc_makespan(graph)
         calc_tails(graph)
         get_critical(graph)
