@@ -1,5 +1,6 @@
-numpy>=1.19.*
-pyomo>=6.*
+numpy>=1.19.0
+pandas
+pyomo>=6.0
 pymoo==0.6.*
 pymoode
 matplotlib
