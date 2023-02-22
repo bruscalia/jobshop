@@ -80,9 +80,10 @@ def append_to_pool(S: Graph, P: np.array, C_pool=np.array, min_delta=2, verbose=
 
 
 def intensificaton(P, C_pool, min_delta=2, verbose=False):
+    P0 = P.copy()
     for i, j in combinations(range(len(P)), 2):
-        S = P[i]
-        T = P[j]
+        S = P0[i]
+        T = P0[j]
         S_gmin = path_relinking(S, T, min_delta=2)
         P, C_pool = update_pool(S_gmin, P, C_pool, min_delta=min_delta, verbose=verbose)
         S_gmin = path_relinking(T, S, min_delta=2)
@@ -90,8 +91,8 @@ def intensificaton(P, C_pool, min_delta=2, verbose=False):
     return P, C_pool
 
 
-def grasp_init(
-    params: JobShopParams, maxiter=1000, alpha=(0.0, 1.0), min_delta=2,
+def grasp_pool(
+    params: JobShopParams, maxiter=1000, alpha=(0.0, 1.0), maxpool=10, min_diff=0.25,
     verbose=False, seed=None,
 ):
     """Initialize a Pool a solutions using basic GRASP with minimal diversity
@@ -108,8 +109,11 @@ def grasp_init(
         Greediness parameter defined in the range (0, 1) in which 0 is random and 1 is greedy.
         If a tuple is passed a random uniform generator is used. By default (0.0, 1.0)
     
-    min_delta : int, optional
-        Minumum difference in schedule between two solutions from the same pool, by default 2
+    maxpool : int, optional
+        Number of solutions in elite pool, by default 10
+    
+    min_diff : float, optional
+        Variation factor to include a new solution in the pool, by default 2
     
     verbose : bool, optional
         Either or not to print messages while the algorithm runs, by default False
@@ -131,6 +135,9 @@ def grasp_init(
     else:
         get_alpha = lambda: alpha
     
+    # Obtain min delta from params
+    min_delta = ceil(min_diff * len(params.machines) * len(params.jobs))
+    
     # Initialize seed and solutions pool
     np.random.seed(seed)
     P = np.array([])
@@ -145,8 +152,12 @@ def grasp_init(
         calc_tails(S)
         get_critical(S)
         S = local_search(S)
-
-        P, C_pool = append_to_pool(S, P, C_pool, min_delta=min_delta, verbose=verbose)
+        
+        # If pool is full update, else append
+        if len(P) == maxpool:
+            P, C_pool = update_pool(S, P, C_pool, min_delta=min_delta, verbose=verbose)
+        else:
+            P, C_pool = append_to_pool(S, P, C_pool, min_delta=min_delta, verbose=verbose)
     
     # Sort by C_pool
     new_sort = np.argsort(C_pool)
@@ -158,7 +169,7 @@ def grasp_init(
 
 def grasp_pr(
     params: JobShopParams, maxiter=500, init_iter=0.5, alpha=(0.0, 1.0),
-    maxpool=10, ifreq=100, min_diff=0.25, post_opt=False, mixed_construction=False,
+    maxpool=10, ifreq=100, min_diff=0.25, post_opt=False, mixed_construction=True,
     verbose=False, seed=None,
 ):
     """Perform GRASP with Path Relinking in the job-shop scheduling problem
@@ -184,7 +195,7 @@ def grasp_pr(
     ifreq : int, optional
         Frequence of intensification strategy, by default 10
     
-    min_diff : int, optional
+    min_diff : float, optional
         Variation factor to include a new solution in the pool, by default 2
     
     post_opt : bool, optional
@@ -299,7 +310,7 @@ def grasp_pr_alt(
     ifreq : int, optional
         Frequence of intensification strategy, by default 10
     
-    min_diff : int, optional
+    min_diff : float, optional
         Variation factor to include a new solution in the pool, by default 2
     
     acceptance_quantile : float, optional
@@ -333,7 +344,7 @@ def grasp_pr_alt(
     
     # Initialize seed and solutions pool
     np.random.seed(seed)
-    P, C_pool = grasp_init(
+    P, C_pool = grasp_pool(
         params, maxiter=init_iter, alpha=alpha, min_delta=min_delta,
         verbose=False, seed=seed,
     )
