@@ -9,10 +9,10 @@ BASE_PACKAGE = 'jobshop'
 
 setuptools.setup(
     name='jobshop',
-    version='0.0.1.dev7',
-    author='DigitalTech',
+    version='0.0.1.dev18',
+    author='Bruno Scalia C. F. Leite',
     author_email='bruscalia12@gmail.com',
-    description='Pacote com implementações do jobshop problem',
+    description='Job-shop scheduling problem Python package',
     long_description=long_description,
     packages=find_packages(include=[BASE_PACKAGE, BASE_PACKAGE + '.*']),
     install_requires=[
