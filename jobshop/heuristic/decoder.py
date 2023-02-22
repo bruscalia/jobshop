@@ -1,7 +1,7 @@
 import numpy as np
 from jobshop.params import JobShopParams
-from jobshop.heurstic.operations import Graph
-from jobshop.heurstic.evaluation import calc_makespan
+from jobshop.heuristic.operations import Graph
+from jobshop.heuristic.evaluation import calc_makespan
 
 
 class Decoder(JobShopParams):

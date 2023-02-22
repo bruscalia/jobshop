@@ -1,5 +1,5 @@
 import numpy as np
-from jobshop.heurstic.operations import Graph
+from jobshop.heuristic.operations import Graph
 
 
 def get_constr_Q(graph: Graph):

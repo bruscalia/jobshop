@@ -1,4 +1,4 @@
-from jobshop.heurstic.operations import Graph
+from jobshop.heuristic.operations import Graph
 
 
 def get_times_Q(graph: Graph):

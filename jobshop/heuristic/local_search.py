@@ -1,5 +1,5 @@
-from jobshop.heurstic.operations import Graph
-from jobshop.heurstic.evaluation import calc_tails, calc_makespan
+from jobshop.heuristic.operations import Graph
+from jobshop.heuristic.evaluation import calc_tails, calc_makespan
 
 
 def get_critical(graph: Graph):
