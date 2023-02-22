@@ -80,14 +80,39 @@ def append_to_pool(S: Graph, P: np.array, C_pool=np.array, min_delta=2, verbose=
 
 
 def intensificaton(P, C_pool, min_delta=2, verbose=False):
-    P0 = P.copy()
-    for i, j in combinations(range(len(P)), 2):
-        S = P0[i]
-        T = P0[j]
-        S_gmin = path_relinking(S, T, min_delta=2)
-        P, C_pool = update_pool(S_gmin, P, C_pool, min_delta=min_delta, verbose=verbose)
-        S_gmin = path_relinking(T, S, min_delta=2)
-        P, C_pool = update_pool(S_gmin, P, C_pool, min_delta=min_delta, verbose=verbose)
+    """Do intensification routine in which PR is performed in every pair of solutions in a pool (including new)
+
+    Parameters
+    ----------
+    P : np.array
+        Pool of solutions
+    
+    C_pool : np.array
+        Cost of solutions
+    
+    min_delta : int, optional
+        Minimum difference of solutions to update pool, by default 2
+    
+    verbose : bool, optional
+        Either or not to print messages, by default False
+
+    Returns
+    -------
+    P : np.array
+        Pool of solutions (Graph instances)
+    
+    C_pool : np.array
+        Makespan of solutions
+    """
+    Q = set(P.copy())
+    while len(Q) > 0:
+        S = Q.pop()
+        for T in P:
+            S_gmin = path_relinking(S, T, min_delta=2)
+            P, C_pool = update_pool(S_gmin, P, C_pool, min_delta=min_delta, verbose=verbose)
+            if S_gmin in P:
+                print(f"New solution to Q: {S_gmin.C}")
+                Q.add(S_gmin)
     return P, C_pool
 
 
@@ -271,7 +296,11 @@ def grasp_pr(
         
         # Do intensification in random pair of solutions
         if i % ifreq == 0:
+            if verbose:
+                print("Starting intensification")
             P, C_pool = intensificaton(P, C_pool, min_delta=min_delta, verbose=verbose)
+            if verbose:
+                print("Finished intensification")
     
     # Post optimization
     if post_opt:
