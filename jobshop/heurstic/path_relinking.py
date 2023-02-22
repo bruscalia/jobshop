@@ -14,7 +14,12 @@ def get_delta_solutions(S: Graph, T: Graph):
     return delta_set
 
 
-def path_relinking(S: Graph, T: Graph, max_iter=1000):
+def get_delta_module(S: Graph, T: Graph):
+    delta_sol = get_delta_solutions(S, T)
+    return sum(len(delta_machine) for delta_machine in delta_sol.values())
+
+
+def path_relinking(S: Graph, T: Graph, min_delta=2, max_iter=1000):
     
     # Initialize values
     c_gmin = S.C
@@ -24,7 +29,7 @@ def path_relinking(S: Graph, T: Graph, max_iter=1000):
     total_lenght = sum(len(delta_machine) for delta_machine in delta_sol.values())
     
     # Do path
-    while total_lenght >= 2 and iter_count <= max_iter:
+    while total_lenght >= min_delta and iter_count <= max_iter:
         
         # Initialize values of iteration
         c_min = float("inf")
