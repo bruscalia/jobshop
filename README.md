@@ -63,12 +63,12 @@ from jobshop.heurstic.grasp.pr import grasp_pr
 ```
 
 ```python
-sol_grasp = grasp(params, n_iter=10000, alpha=(0.3, 0.9))
+sol_grasp = grasp(params, maxiter=10000, alpha=(0.3, 0.9))
 print(sol_grasp.C)
 ```
 
 ```python
-pool_pr = grasp_pr(params, n_iter=10000, init_iter=0.5, alpha=(0.3, 0.9), maxpool=20)
+pool_pr = grasp_pr(params, maxiter=10000, init_iter=0.5, alpha=(0.3, 0.9), maxpool=20)
 sol_grasp_pr = pool_pr[0]
 print(sol_grasp_pr.C)
 ```
