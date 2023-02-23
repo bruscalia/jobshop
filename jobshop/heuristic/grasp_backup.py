@@ -1,9 +1,9 @@
 import numpy as np
-from jobshop.heurstic.operations import Graph
+from jobshop.heuristic.operations import Graph
 from jobshop.params import JobShopParams
-from jobshop.heurstic.construction import semi_greedy_makespan
-from jobshop.heurstic.evaluation import calc_tails, calc_makespan
-from jobshop.heurstic.local_search import get_critical, local_search
+from jobshop.heuristic.construction import semi_greedy_makespan
+from jobshop.heuristic.evaluation import calc_tails, calc_makespan
+from jobshop.heuristic.local_search import get_critical, local_search
 
 
 class GraspSolution:

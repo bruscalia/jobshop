@@ -58,8 +58,8 @@ The next steps are being included in this [unstable notebook](./notebooks/test_g
 ```python
 import numpy as np
 from jobshop.params import JobShopRandomParams
-from jobshop.heurstic.grasp.simple import grasp
-from jobshop.heurstic.grasp.pr import grasp_pr
+from jobshop.heuristic.grasp.simple import grasp
+from jobshop.heuristic.grasp.pr import grasp_pr
 ```
 
 ```python
@@ -81,8 +81,8 @@ from pymoo.core.problem import ElementwiseProblem
 from pymoo.core.duplicate import ElementwiseDuplicateElimination
 from pymoo.optimize import minimize
 from jobshop.params import JobShopRandomParams, JobShopParams
-from jobshop.heurstic.decoder import Decoder
-from jobshop.heurstic.brkga import BRKGA
+from jobshop.heuristic.decoder import Decoder
+from jobshop.heuristic.brkga import BRKGA
 ```
 
 ```python

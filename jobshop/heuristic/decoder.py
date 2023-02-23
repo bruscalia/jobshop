@@ -1,7 +1,8 @@
 import numpy as np
 from jobshop.params import JobShopParams
-from jobshop.heurstic.operations import Graph
-from jobshop.heurstic.evaluation import calc_makespan
+from jobshop.heuristic.operations import Graph
+from jobshop.heuristic.evaluation import calc_makespan, calc_tails
+from jobshop.heuristic.local_search import get_critical, local_search
 
 
 class Decoder(JobShopParams):
@@ -118,4 +119,11 @@ class Decoder(JobShopParams):
         pheno = self.get_pheno(x)
         return self.build_graph(pheno)
         
-        
+
+class LSDecoder(Decoder):
+    
+    def build_graph(self, pheno):
+        graph = super().build_graph(pheno)
+        calc_tails(graph)
+        get_critical(graph)
+        return local_search(graph)
