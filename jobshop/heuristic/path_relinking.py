@@ -53,7 +53,6 @@ def path_relinking(S: Graph, T: Graph, min_delta=2):
     iter_count = 0
     total_lenght = sum(len(delta_machine) for delta_machine in delta_sol.values())
     max_iter = total_lenght * 100
-    break_flag = False
     
     # Do path
     while total_lenght >= min_delta and iter_count <= max_iter:
@@ -62,10 +61,10 @@ def path_relinking(S: Graph, T: Graph, min_delta=2):
         c_min = float("inf")
         
         # Iterate over machines
-        for m in np.random.permutation(S.machines):
+        for m in S.machines:
             
             # Iterate over swaps of machine
-            for (i, j) in np.random.permutation(delta_sol[m]):
+            for (i, j) in delta_sol[m]:
                 S_alt = S.copy()
                 S_alt.M[m].jobs.swap(i, j)
                 c_alt = calc_makespan(S_alt)
@@ -76,11 +75,6 @@ def path_relinking(S: Graph, T: Graph, min_delta=2):
                     S_min = S_alt
                     best_swap = (i, j)
                     m_min = m
-                    
-                    # Add random component to explore all possibilities or not
-                    if np.random.rand() <= 0.75:
-                        break_flag = True
-                        break
                 
                 # If better than previous update
                 elif c_alt <= c_min:
@@ -88,11 +82,6 @@ def path_relinking(S: Graph, T: Graph, min_delta=2):
                     S_min = S_alt
                     best_swap = (i, j)
                     m_min = m
-            
-            # Break outside loop if step was taken
-            if break_flag:
-                break_flag = False
-                break
         
         # Update after move
         S = S_min
