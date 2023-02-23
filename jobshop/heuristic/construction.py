@@ -23,6 +23,7 @@ def semi_greedy_makespan(graph: Graph, alpha=0.9):
     
     # Get initial candidates
     Q = get_constr_Q(graph)
+    C = 0
     k = 0
     max_iter = len(graph.jobs) * len(graph.machines) + 1
 
@@ -31,8 +32,7 @@ def semi_greedy_makespan(graph: Graph, alpha=0.9):
         
         k = k + 1
 
-        # Start 
-        C = 0
+        # Start
         H = {}
         R = {}
         S = []
