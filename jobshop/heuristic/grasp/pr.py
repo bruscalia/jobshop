@@ -20,7 +20,7 @@ def update_pool(S: Graph, P: np.array, C_pool=np.array, min_delta=2, verbose=Fal
             print(f"New best solution: {S.C}")
             print(f"Updated Pool: {C_pool}")
         return P, C_pool
-    elif S.C <= C_pool[-1]:
+    elif S.C < C_pool[-1]:
         for Sp in P:
             delta_mod = get_delta_module(S, Sp)
             if delta_mod < min_delta:
