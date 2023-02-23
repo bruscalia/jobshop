@@ -51,15 +51,16 @@ disj_model.plot()
 
 ## GRASP
 
-This is still under development, however you can have a glimpse of the final results.
-
-The next steps are being included in this [unstable notebook](./notebooks/test_grasp.ipynb).
+Although a very slow solution process, the following GRASP with Path Relinking implementation would produce a good quality solution of 154 versus known optima 153.
 
 ```python
 import numpy as np
 from jobshop.params import JobShopRandomParams
-from jobshop.heuristic.grasp.simple import grasp
-from jobshop.heuristic.grasp.pr import grasp_pr
+from jobshop.heuristic.grasp import grasp, grasp_pr
+```
+
+```python
+params = JobShopRandomParams(10, 10, t_span=(0, 20), seed=12)
 ```
 
 ```python
@@ -68,73 +69,38 @@ print(sol_grasp.C)
 ```
 
 ```python
-pool_pr = grasp_pr(params, maxiter=10000, init_iter=0.5, alpha=(0.3, 0.9), maxpool=20)
+pool_pr = grasp_pr(
+    params, maxiter=10000, ifreq=1000, mixed_construction=True,
+    alpha=(0.0, 1.0), maxpool=12, seed=12,
+)
 sol_grasp_pr = pool_pr[0]
 print(sol_grasp_pr.C)
 ```
 
 ## BRKGA
 
+The following code is expected to return the good solution of 154 versus known optima 153. The termination operator passed would force the algorithm to stop if either the number of generations reaches 200 or a solution with objective value of 153 is found.
+
 ```python
-import numpy as np
-from pymoo.core.problem import ElementwiseProblem
-from pymoo.core.duplicate import ElementwiseDuplicateElimination
 from pymoo.optimize import minimize
-from jobshop.params import JobShopRandomParams, JobShopParams
-from jobshop.heuristic.decoder import Decoder
-from jobshop.heuristic.brkga import BRKGA
+from jobshop.params import JobShopRandomParams
+from jobshop.heuristic.brkga import BRKGA, LSDecoder, JobShopProblem
+from jobshop.heuristic.brkga.termination import TargetTermination
 ```
 
 ```python
-params = JobShopRandomParams(10, 10, t_span=(5, 20), seed=12)
-```
-
-```python
-class JobShopProblem(ElementwiseProblem):
-    
-    def __init__(self, params: JobShopParams):
-        self.params = params
-        n_var = 0
-        for j, machines in self.params.seq.items():
-            n_var = n_var + len(machines)
-        xl = np.zeros(n_var)
-        xu = np.ones(n_var)
-        self.decoder = Decoder(
-            self.params.machines, self.params.jobs,
-            self.params.p_times, self.params.seq
-        )
-        super().__init__(elementwise=True, n_var=n_var, n_obj=1, xl=xl, xu=xu)
-    
-    def _evaluate(self, x, out, *args, **kwargs):
-        z, C = self.decoder.decode(x)
-        out["pheno"] = z
-        out["hash"] = hash(str(z))
-        out["F"] = C
-
-
-class DuplicatesEncoder(ElementwiseDuplicateElimination):
-    
-    def __init__(self, x_tol=1e-3) -> None:
-        super().__init__()
-        self.x_tol = x_tol
-
-    def is_equal(self, a, b):
-        same_pheno = a.get("hash") == b.get("hash")
-        diff_x = a.get("X") - b.get("X")
-        dist_x = np.sqrt(diff_x.dot(diff_x))
-        return same_pheno and dist_x <= self.x_tol * len(diff_x)
+params = JobShopRandomParams(10, 10, t_span=(0, 20), seed=12)
 ```
 
 ```python
 brkga = BRKGA(
     pop_size=100,
-    perc_elite=0.15,
+    perc_elite=0.2,
     perc_mutants=0.15,
     bias=0.8,
-    eliminate_duplicates=DuplicatesEncoder(1e-5),
 )
-problem = JobShopProblem(params)
-res = minimize(problem, brkga, ("n_gen", 200), verbose=True, seed=12)
+problem = JobShopProblem(params, LSDecoder)
+res = minimize(problem, brkga, termination=TargetTermination(200, 153), verbose=True, seed=12)
 ```
 
 ```python
