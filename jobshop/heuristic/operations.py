@@ -170,6 +170,13 @@ class Graph(JobShopParams):
     def copy(self):
         return copy.deepcopy(self)
     
+    @property
+    def signature(self):
+        pheno = []
+        for m in self.M.values():
+            pheno = pheno + m.jobs
+        return hash(str(pheno))
+    
     def plot(self, horizontal=True, figsize=[7, 3], dpi=100, colors=None):
         if horizontal:
             self._plot_horizontal(figsize=figsize, dpi=dpi, colors=colors)
