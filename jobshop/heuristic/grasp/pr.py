@@ -320,7 +320,7 @@ def grasp_pr(
                 print("Finished intensification")
             
             # Assign half the pool to inf
-            if np.array_equiv(last_int_pool, P):
+            if np.array_equiv(last_int_pool, P) and (i > ifreq):
                 if verbose:
                     print("Assign half the pool inf values")
                 C_pool[-last_half:] = float("inf")
