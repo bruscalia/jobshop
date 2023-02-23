@@ -6,7 +6,7 @@ from jobshop.params import JobShopParams
 from jobshop.heuristic.construction import semi_greedy_makespan, semi_greedy_time_remaining
 from jobshop.heuristic.evaluation import calc_makespan, calc_tails
 from jobshop.heuristic.local_search import get_critical, local_search
-from jobshop.heuristic.path_relinking import get_delta_module, path_relinking
+from jobshop.heuristic.path_relinking import PathRelinking, get_delta_module, get_delta_solutions
 
 
 def update_pool(S: Graph, P: np.array, C_pool=np.array, min_delta=2, verbose=False):
@@ -79,7 +79,7 @@ def append_to_pool(S: Graph, P: np.array, C_pool=np.array, min_delta=2, verbose=
         return P, C_pool
 
 
-def intensificaton(P, C_pool, min_delta=2, verbose=False):
+def intensificaton(P, C_pool, path_relinking=None, min_delta=2, verbose=False):
     """Do intensification routine in which PR is performed in every pair of solutions in a pool (including new)
 
     Parameters
@@ -104,14 +104,23 @@ def intensificaton(P, C_pool, min_delta=2, verbose=False):
     C_pool : np.array
         Makespan of solutions
     """
+    # Create a set of elite solutions not yet evaluated
     Q = set(P.copy())
+    
+    # Instantiate path relinking if None
+    if path_relinking is None:
+        path_relinking = PathRelinking()
+    
+    # Do path relinking from S to every other in Pool
     while len(Q) > 0:
         S = Q.pop()
         for T in P:
             S_gmin = path_relinking(S, T, min_delta=2)
             P, C_pool = update_pool(S_gmin, P, C_pool, min_delta=min_delta, verbose=verbose)
+            # S_gmin as a copy is considered different from S
             if S_gmin in P:
-                print(f"New solution to Q: {S_gmin.C}")
+                if verbose:
+                    print(f"New solution to Q: {S_gmin.C}")
                 Q.add(S_gmin)
     return P, C_pool
 
@@ -253,6 +262,9 @@ def grasp_pr(
     # Obtain min delta from params
     min_delta = ceil(min_diff * len(params.machines) * len(params.jobs))
     
+    # Instantiate path_relinking that stores visited paths
+    path_relinking = PathRelinking()
+    
     # Obtain init_iter if float
     n_init = ceil(maxiter * init_iter)
     
@@ -261,6 +273,7 @@ def grasp_pr(
     P = np.array([])
     C_pool = np.array([])
     grasp_solutions = []
+    last_int_pool = P.copy()
     
     for i in range(maxiter):
         
@@ -275,6 +288,7 @@ def grasp_pr(
         get_critical(S)
         S = local_search(S)
         grasp_solutions.append(S.C)
+        last_half = maxpool // 2
         
         # If pool is full
         if len(P) == maxpool:
@@ -298,15 +312,31 @@ def grasp_pr(
         if i % ifreq == 0:
             if verbose:
                 print("Starting intensification")
-            P, C_pool = intensificaton(P, C_pool, min_delta=min_delta, verbose=verbose)
+            P, C_pool = intensificaton(
+                P, C_pool, path_relinking=path_relinking,
+                min_delta=min_delta, verbose=verbose,
+            )
             if verbose:
                 print("Finished intensification")
+            
+            # Assign half the pool to inf
+            if np.array_equiv(last_int_pool, P):
+                if verbose:
+                    print("Assign half the pool inf values")
+                C_pool[-last_half:] = float("inf")
+            
+            # Update last pool
+            last_int_pool = P.copy()
+                
     
     # Post optimization
     if post_opt:
         if verbose:
                 print("Post optimization")
-        P, C_pool = intensificaton(P, C_pool, min_delta=min_delta, verbose=verbose)
+        P, C_pool = intensificaton(
+            P, C_pool, path_relinking=path_relinking,
+            min_delta=min_delta, verbose=verbose,
+        )
     
     return P
 
