@@ -171,6 +171,14 @@ class Graph(JobShopParams):
         return copy.deepcopy(self)
     
     @property
+    def pheno(self):
+        releases = np.array([o.release for o in self.O.values()])
+        unordered = np.array([o.job for o in self.O.values()])
+        order = np.argsort(releases)
+        pheno = unordered[order]
+        return pheno
+    
+    @property
     def signature(self):
         pheno = []
         for m in self.M.values():
