@@ -12,7 +12,7 @@ $$
     \text{min} \quad & C \\
     \text{s.t.}~~ & x_{\sigma_{h-1}^j, j} + p_{\sigma_{h-1}^j, j} \leq x_{\sigma_{h}^j, j}
         & \forall ~ j \in J; h \in (2, ..., |M|)\\
-    & x_{m, j} + p_{m, j} \leq mx_{m, k} + V (1 - z_{m, j, k})
+    & x_{m, j} + p_{m, j} \leq x_{m, k} + V (1 - z_{m, j, k})
         & \forall ~ j, k \in J, j \neq k; m \in M\\
     & z_{m, j, k} + z_{m, k, j} = 1
         & \forall ~ j, k \in J, j \neq k; m \in M\\
