@@ -1,4 +1,6 @@
 import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib as mpl
 from typing import Any, Union
 from jobshop.params import JobShopParams, JobSequence
 import copy
@@ -46,6 +48,9 @@ class Machine:
 
 
 class Graph(JobShopParams):
+    
+    cmap = mpl.colormaps["Dark2"]
+    colors = cmap.colors
     
     def __init__(self, machines, jobs, p_times, seq):
         """Graph structure to job-shop problem
@@ -164,3 +169,65 @@ class Graph(JobShopParams):
     
     def copy(self):
         return copy.deepcopy(self)
+    
+    def plot(self, horizontal=True, figsize=[7, 3], dpi=100, colors=None):
+        if horizontal:
+            self._plot_horizontal(figsize=figsize, dpi=dpi, colors=colors)
+        else:
+            self._plot_vertical(figsize=figsize, dpi=dpi, colors=colors)
+
+    def _plot_vertical(self, figsize=[7, 3], dpi=100, colors=None):
+        
+        if colors is None:
+            colors = self.colors
+        
+        fig, ax = plt.subplots(figsize=figsize, dpi=dpi)
+
+        for i, j in enumerate(self.jobs):
+            machines, starts, spans = self._get_elements(j)
+            
+            if i >= len(colors):
+                i = i % len(colors)
+            
+            color = colors[i]
+            ax.bar(machines, spans, bottom=starts, label=f"Job {j}", color=color)
+
+        ax.set_xticks(self.machines)
+        ax.set_xlabel("Machine")
+        ax.set_ylabel("Time")
+        ax.legend(loc='upper left', bbox_to_anchor=(1, 1.03))
+        fig.tight_layout()
+        plt.show()
+
+    def _plot_horizontal(self, figsize=[7, 3], dpi=100, colors=None):
+        
+        colors = self._get_colors(colors)
+        
+        fig, ax = plt.subplots(figsize=figsize, dpi=dpi)
+
+        for i, j in enumerate(self.jobs):
+            machines, starts, spans = self._get_elements(j)
+            
+            if i >= len(colors):
+                i = i % len(colors)
+            
+            color = colors[i]
+            ax.barh(machines, spans, left=starts, label=f"Job {j}", color=color)
+
+        ax.set_yticks(self.machines)
+        ax.set_xlabel("Time")
+        ax.set_ylabel("Machine")
+        ax.legend(loc='upper left', bbox_to_anchor=(1, 1.03))
+        fig.tight_layout()
+        plt.show()
+    
+    def _get_colors(self, colors):
+        if colors is None:
+            colors = self.colors
+        return colors
+    
+    def _get_elements(self, j):
+        machines = self.machines
+        starts = [self.O[m, j].release for m in self.machines]
+        spans = [self.O[m, j].duration for m in self.machines]
+        return machines, starts, spans

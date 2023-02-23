@@ -12,12 +12,14 @@ setuptools.setup(
     version='0.0.1.scalia7',
     author='Bruno Scalia C. F. Leite',
     author_email='bruscalia12@gmail.com',
-    description='Pacote com implementações do jobshop problem',
+    description='Job-shop scheduling problem Python package',
     long_description=long_description,
     packages=find_packages(include=[BASE_PACKAGE, BASE_PACKAGE + '.*']),
     install_requires=[
-        "numpy>=1.19.*",
-        "pyomo>=6.*",
+        "numpy>=1.19.0",
+        "pandas",
+        "pyomo>=6.0",
+        "pymoo==0.6.*",
         "matplotlib",
     ]
 )
