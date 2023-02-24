@@ -1,4 +1,5 @@
 import numpy as np
+import json
 
 
 class JobSequence(list):
@@ -47,12 +48,12 @@ class JobShopParams:
 
 class JobShopRandomParams(JobShopParams):
     
-    def __init__(self, n_machines, n_jobs, t_span=(0, 20), seed=None):
+    def __init__(self, n_machines, n_jobs, t_span=(1, 20), seed=None):
         self.t_span = t_span
         self.seed = seed
         
-        machines = np.arange(n_machines) + 1
-        jobs = np.arange(n_jobs) + 1
+        machines = np.arange(n_machines, dtype=int)
+        jobs = np.arange(n_jobs, dtype=int)
         p_times = self._random_times(machines, jobs, t_span)
         seq = self._random_sequences(machines, jobs)
         super().__init__(machines, jobs, p_times, seq)
@@ -73,3 +74,31 @@ class JobShopRandomParams(JobShopParams):
             for j in jobs
         }
 
+
+def job_params_from_json(filename: str):
+    """Returns a JobShopParams instance from a json file containing
+    - "seq": a list of lists of the machines used in a job
+    - "p_times": a list of lists of processing times of kth operation of a given job (position of seq)
+
+    Parameters
+    ----------
+    filename : str
+        Filename of json
+
+    Returns
+    -------
+    JobShopParams
+        Parameters of problem
+    """
+    data = json.load(open(filename, "r"))
+    seq = {}
+    p_times = {}
+    jobs = np.arange(len(data["seq"]), dtype=int)
+    _m = data["seq"][0].copy()
+    _m.sort()
+    machines = np.array(_m, dtype=int)
+    for j, ops in enumerate(data["seq"]):
+        seq[j] = JobSequence(ops)
+        for k, m in enumerate(ops):
+            p_times[m, j] = data["p_times"][j][k]
+    return JobShopParams(machines, jobs, p_times, seq)

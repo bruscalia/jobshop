@@ -1,5 +1,4 @@
-import setuptools
-from setuptools import find_packages
+from setuptools import setup, find_packages
 
 
 with open("README.md", "r", encoding="utf-8") as fh:
@@ -7,9 +6,9 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 BASE_PACKAGE = 'jobshop'
 
-setuptools.setup(
+setup(
     name='jobshop',
-    version='0.0.1.dev23',
+    version='0.0.1.dev24',
     author='Bruno Scalia C. F. Leite',
     author_email='bruscalia12@gmail.com',
     description='Job-shop scheduling problem Python package',
