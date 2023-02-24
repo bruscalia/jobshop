@@ -3,6 +3,8 @@ Python package for modeling the job-shop scheduling problem using mixed-integer 
 
 See here a [MIP](#mip) and a [GRASP](#grasp) example.
 
+Examples on how to run experiments on benchmark test problems can be found here for [GRASP](./notebooks/grasp_instance.ipynb) and [BRKGA](./notebooks/brkga_instance.ipynb)
+
 ## MIP
 
 Let us see an example of how to implement the disjunctive model for the job-shop problem, described by the equations below.
