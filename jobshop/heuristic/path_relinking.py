@@ -40,8 +40,8 @@ def get_delta_solutions(S: Graph, T: Graph):
 
 
 def get_delta_module(S: Graph, T: Graph):
-    delta_sol = get_delta_solutions(S, T)
-    return sum(len(delta_machine) for delta_machine in delta_sol.values())
+    delta_sol = np.sum(S.pheno != T.pheno)
+    return delta_sol
 
 
 def path_relinking(S: Graph, T: Graph, min_delta=2):
@@ -69,15 +69,8 @@ def path_relinking(S: Graph, T: Graph, min_delta=2):
                 S_alt.M[m].jobs.swap(i, j)
                 c_alt = calc_makespan(S_alt)
                 
-                # If strictly better than the current path solution
-                if c_alt < S_gmin.C:
-                    c_min = c_alt
-                    S_min = S_alt
-                    best_swap = (i, j)
-                    m_min = m
-                
                 # If better than previous update
-                elif c_alt <= c_min:
+                if c_alt <= c_min:
                     c_min = c_alt
                     S_min = S_alt
                     best_swap = (i, j)
