@@ -8,7 +8,7 @@ BASE_PACKAGE = 'jobshop'
 
 setup(
     name='jobshop',
-    version='0.1.0.beta1',
+    version='0.1.0',
     author='Bruno Scalia C. F. Leite',
     author_email='bruscalia12@gmail.com',
     description='Job-shop scheduling problem Python package',
