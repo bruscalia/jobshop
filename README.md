@@ -5,6 +5,15 @@ See here a [MIP](#mip) and a [GRASP](#grasp) example.
 
 Examples on how to run experiments on benchmark test problems can be found here for [GRASP](./notebooks/grasp_instance.ipynb) and [BRKGA](./notebooks/brkga_instance.ipynb)
 
+## Install
+
+First, make sure you have a Python 3 environment installed.
+
+From the current version on github:
+```
+pip install git+https://github.com/bruscalia/jobshops
+```
+
 ## MIP
 
 Let us see an example of how to implement the disjunctive model for the job-shop problem, described by the equations below.
