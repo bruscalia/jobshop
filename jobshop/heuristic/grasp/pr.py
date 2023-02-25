@@ -1,12 +1,11 @@
 import numpy as np
 from math import ceil
-from itertools import combinations
 from jobshop.heuristic.operations import Graph
 from jobshop.params import JobShopParams
 from jobshop.heuristic.construction import semi_greedy_makespan, semi_greedy_time_remaining
 from jobshop.heuristic.evaluation import calc_makespan, calc_tails
 from jobshop.heuristic.local_search import get_critical, local_search
-from jobshop.heuristic.path_relinking import PathRelinking, get_delta_module, get_delta_solutions
+from jobshop.heuristic.path_relinking import PathRelinking, get_delta_module
 
 
 def update_pool(S: Graph, P: np.array, C_pool=np.array, min_delta=2, verbose=False):
@@ -300,7 +299,7 @@ def grasp_pr(
         target = - float("inf")
     
     # Instantiate path_relinking that stores visited paths
-    path_relinking = PathRelinking()
+    path_relinking = PathRelinking(seed=seed)
     
     # Obtain init_iter if float
     n_init = ceil(maxiter * init_iter)
