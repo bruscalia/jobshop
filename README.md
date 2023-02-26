@@ -11,7 +11,7 @@ First, make sure you have a Python 3 environment installed.
 
 From the current version on github:
 ```
-pip install git+https://github.com/bruscalia/jobshops
+pip install git+https://github.com/bruscalia/jobshop
 ```
 
 ## MIP
@@ -21,7 +21,7 @@ Let us see an example of how to implement the disjunctive model for the job-shop
 $$
 \begin{align*}
     \text{min} \quad & C \\
-    \text{s.t.}~~ & x_{\sigma_{h-1}^j, j} + p_{\sigma_{h-1}^j, j} \leq x_{\sigma_{h}^j, j}
+    \text{s.t.} \quad & x_{\sigma_{h-1}^j, j} + p_{\sigma_{h-1}^j, j} \leq x_{\sigma_{h}^j, j}
         & \forall ~ j \in J; h \in (2, ..., |M|)\\
     & x_{m, j} + p_{m, j} \leq x_{m, k} + V (1 - z_{m, j, k})
         & \forall ~ j, k \in J, j \neq k; m \in M\\
