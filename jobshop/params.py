@@ -1,4 +1,5 @@
 import numpy as np
+from typing import Iterable, Any
 import json
 
 
@@ -39,7 +40,23 @@ class JobSequence(list):
 
 class JobShopParams:
     
-    def __init__(self, machines, jobs, p_times, seq):
+    def __init__(self, machines: Iterable, jobs: Iterable, p_times: dict, seq: dict):
+        """White label class for job-shop parameters
+
+        Parameters
+        ----------
+        machines : Iterable
+            Set of machines
+            
+        jobs : Iterable
+            Set of jobs
+        
+        p_times : dict
+            Processing times indexed by pairs machine, job
+        
+        seq : dict
+            Sequence of operations (machines) of each job
+        """
         self.machines = machines
         self.jobs = jobs
         self.p_times = p_times
@@ -48,7 +65,23 @@ class JobShopParams:
 
 class JobShopRandomParams(JobShopParams):
     
-    def __init__(self, n_machines, n_jobs, t_span=(1, 20), seed=None):
+    def __init__(self, n_machines: int, n_jobs: int, t_span=(1, 20), seed=None):
+        """Class for generating job-shop parameters
+
+        Parameters
+        ----------
+        n_machines : int
+            Number of machines
+        
+        n_jobs : int
+            Number of jobs
+        
+        t_span : tuple, optional
+            Processing times range, by default (1, 20)
+        
+        seed : int | None, optional
+            numpy random seed, by default None
+        """
         self.t_span = t_span
         self.seed = seed
         

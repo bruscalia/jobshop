@@ -39,3 +39,16 @@ class DuplicatesEncoder(ElementwiseDuplicateElimination):
         diff_x = a.get("X") - b.get("X")
         dist_x = np.sqrt(diff_x.dot(diff_x))
         return same_pheno and dist_x <= self.x_tol * len(diff_x)
+
+
+class DuplicatesPheno(ElementwiseDuplicateElimination):
+    
+    def __init__(self, min_diff=0.2) -> None:
+        super().__init__()
+        self.min_diff = min_diff
+
+    def is_equal(self, a, b):
+        same_pheno = a.get("pheno") == b.get("pheno")
+        diff_x = a.get("X") - b.get("X")
+        dist_x = np.sqrt(diff_x.dot(diff_x))
+        return same_pheno and dist_x <= self.x_tol * len(diff_x)

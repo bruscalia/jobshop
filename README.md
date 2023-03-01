@@ -1,7 +1,7 @@
 # jobshop 
 Python package for modeling the job-shop scheduling problem using mixed-integer programming (MIP) and meta-heuristics.
 
-See here a [MIP](#mip) and [Metaheuristics](#metaheuristics) examples.
+See here [MIP](#mip) and [Metaheuristics](#metaheuristics) examples.
 
 ## Install
 
@@ -23,40 +23,20 @@ from jobshop.params import job_params_from_json
 
 ## MIP
 
-Let us see an example of how to implement the disjunctive model for the job-shop problem, described by the equations below. Those interested in a detailed review of MIP formulations to the job-shop problem can refer to [Ku & Beck (2016)](#mipjssp).
-
-$$
-\begin{align*}
-    \text{min} \quad & C \\
-    \text{s.t.} \quad & x_{\sigma_{h-1}^j, j} + p_{\sigma_{h-1}^j, j} \leq x_{\sigma_{h}^j, j}
-        & \forall ~ j \in J; h \in (2, ..., |M|)\\
-    & x_{m, j} + p_{m, j} \leq x_{m, k} + V (1 - z_{m, j, k})
-        & \forall ~ j, k \in J, j \neq k; m \in M\\
-    & z_{m, j, k} + z_{m, k, j} = 1
-        & \forall ~ j, k \in J, j \neq k; m \in M\\
-    & x_{\sigma_{|M|}^j, j} + p_{\sigma_{|M|}^j, j} \leq C
-        & \forall ~ j \in J\\
-    & x_{m, j} \geq 0 & \forall ~ j \in J; m \in M\\
-    & z_{m, j, k} \in \{0, 1\} & \forall ~ j, k \in J; m \in M\\
-\end{align*}
-$$
+Let us see an example of how to implement the disjunctive model for the job-shop problem, described by the equations below. Those interested in a detailed review of MIP formulations to the job-shop problem can refer to [Ku & Beck (2016)](#mipjssp). An additional notebook with a comparison between the disjunctive and time-indexed models can be found [here](./notebooks/mip_models.ipynb).
 
 ```python
 import numpy as np
 import pyomo.environ as pyo
 from jobshop.params import JobShopRandomParams
-from jobshop.mip.disjunctive import DisjModel
-from jobshop.mip.timeindex import TimeModel
+from jobshop.mip import DisjModel
 ```
 
 ```python
 params = JobShopRandomParams(5, 4, t_span=(5, 20), seed=12)
 disj_model = DisjModel(params)
 
-solver = pyo.SolverFactory(
-    "cbc", 
-    options=dict(cuts="on", sec=20, heur="on", RINS="both", DINS="both"),
-)
+solver = pyo.SolverFactory("cbc", options=dict(cuts="on", sec=20))
 print(solver.solve(disj_model, tee=True))
 ```
 
@@ -69,7 +49,7 @@ disj_model.plot()
 
 ## Metaheuristics
 
-The problem could be formulated in a similar manner with logical relationships between elements, in which we must define the starting time $t$ of each operation $\sigma_{k}^j$ of processing time $p$. For more details of this formulation or [GRASP and GRASP-PR](#grasp) implementation, we suggest referring to [Aiex et al. (2003)](#graspprjssp). For more details of the [BRKGA](#brkga) decoding process, one can refer to [Gonçalves & Resende (2014)](#brkgajssp).
+The problem can be formulated using logical relationships between elements, in which we must define the starting time $t$ of each operation $\sigma_{k}^j$ of processing time $p$. For more details of this formulation or [GRASP and GRASP-PR](#grasp) implementation, we suggest referring to [Aiex et al. (2003)](#graspprjssp). For more details of the [BRKGA](#brkga) decoding process, one can refer to [Gonçalves & Resende (2014)](#brkgajssp).
 
 $$
 \begin{align}
@@ -92,7 +72,7 @@ Now consider the instance *mt10*, a 10x10 problem from the literature. This prob
 
 ```python
 from jobshop.params import job_params_from_json
-from jobshop.heuristic.grasp import grasp, grasp_pr
+from jobshop.heuristic.grasp import GRASP, GRASPPR
 ```
 
 ```python
@@ -101,28 +81,25 @@ params = job_params_from_json("./instances/orlib/mt10.json")
 
 ```python
 # Pure GRASP (fast solutions with lower quality)
-sol_grasp = grasp(params, maxiter=100000, alpha=(0.3, 1.0))
+grasp = GRASP(params, alpha=(0.3, 0.9), seed=12)
+sol_grasp = grasp(25000, target=933, verbose=True)
 print(sol_grasp.C)
 ```
 
 ```python
 # GRASP-PR
-pool_pr = grasp_pr(
-    params, maxiter=100000, ifreq=10000, post_opt=True,
-    init_iter=0.6, alpha=(0.3, 1.0), maxpool=30, min_diff=0.3,
-    seed=12, target=950,
-)
-sol_grasp_pr = pool_pr[0]
-print(sol_grasp_pr.C)
+grasp_pr = GRASPPR(params, alpha=(0.3, 0.9), maxpool=20, post_opt=True, ifreq=5000)
+sol_pr = grasp_pr(25000, verbose=True, seed=12, target=933)
+print(sol_pr.C)
 ```
 
-These configurations would return solutions with makespan of 979 for GRASP and 945 for GRASP-PR, although the latter would take several hours to be obtained.
+These configurations would return solutions with makespan of 998 for GRASP and 950 for GRASP-PR, although the latter would take several hours to be obtained.
 
 ```python
-sol_grasp_pr.plot()
+sol_pr.plot()
 ```
 
-![jobshop_grasppr_plot](./data/grasp_pr_mt10_results_945.png)
+![jobshop_grasppr_plot](./data/grasp_pr_mt10_results_950.png)
 
 ### BRKGA
 
@@ -130,20 +107,21 @@ Let us once again consider problem *mt10* and re-use the previously defined ``pa
 
 ```python
 from pymoo.optimize import minimize
-from jobshop.heuristic.brkga import BRKGA, LSDecoder, JobShopProblem, DuplicatesEncoder
+from jobshop.params import job_params_from_json
+from jobshop.heuristic.brkga import BRKGA, LSDecoder, JobShopProblem, PhenoDuplicates
 from jobshop.heuristic.brkga.termination import TargetTermination
 ```
 
 ```python
 brkga = BRKGA(
-    pop_size=200,
-    perc_elite=0.25,
+    pop_size=150,
+    perc_elite=0.2,
     perc_mutants=0.1,
-    bias=0.8,
-    eliminate_duplicates=DuplicatesEncoder(),
+    bias=0.85,
+    eliminate_duplicates=PhenoDuplicates(min_diff=0.12),
 )
 problem = JobShopProblem(params, LSDecoder)
-res = minimize(problem, brkga, termination=TargetTermination(1000, 950), verbose=True, seed=12)
+res = minimize(problem, brkga, termination=TargetTermination(500, 933), verbose=True, seed=42)
 ```
 
 ```python
@@ -151,13 +129,13 @@ graph = problem.decoder.build_graph_from_string(res.X)
 print(graph.C)
 ```
 
-Using this configuration, BRKGA would return a solution with makespan of 951, which would also take a few hours, although good quality solutions (lesser than 970) could be found within a few minutes.
+Using this configuration, BRKGA would return the good solution with makespan of 936, which would take more than half an hour, although good quality solutions (lesser than 970) could be found within a few minutes.
 
 ```python
 graph.plot()
 ```
 
-![jobshop_brkga_plot](./data/brkga_mt10_results_951.png)
+![jobshop_brkga_plot](./data/brkga_mt10_936.png)
 
 
 ## References

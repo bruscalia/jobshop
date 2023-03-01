@@ -6,4 +6,4 @@ build
 dist
 /dist
 /*.egg-info
-commands.txt
+backup

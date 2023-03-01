@@ -171,19 +171,23 @@ class Graph(JobShopParams):
         return copy.deepcopy(self)
     
     @property
-    def pheno(self):
+    def order(self):
         releases = np.array([o.release for o in self.O.values()])
         unordered = np.array([o.job for o in self.O.values()])
-        order = np.argsort(releases)
-        pheno = unordered[order]
-        return pheno
+        seq = np.argsort(releases)
+        order = unordered[seq]
+        return order
     
     @property
-    def signature(self):
+    def pheno(self):
         pheno = []
         for m in self.M.values():
             pheno = pheno + m.jobs
-        return hash(str(pheno))
+        return np.array(pheno)
+    
+    @property
+    def signature(self):
+        return hash(str(self.order))
     
     def plot(self, horizontal=True, figsize=[7, 3], dpi=100, colors=None):
         if horizontal:
