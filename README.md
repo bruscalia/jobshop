@@ -103,7 +103,7 @@ sol_pr.plot()
 
 ### BRKGA
 
-Let us once again consider problem *mt10* and re-use the previously defined ``params`` instance. Those interested in understanging better the mechanisms of BRKGA might refer to [this presentation](http://www.decom.ufop.br/prof/marcone/Disciplinas/InteligenciaComputacional/brkga.pdf).
+Let us once again consider problem *mt10* and re-use the previously defined ``params`` instance. Those interested in understanding better the mechanisms of BRKGA might refer to [this presentation](http://www.decom.ufop.br/prof/marcone/Disciplinas/InteligenciaComputacional/brkga.pdf).
 
 ```python
 from pymoo.optimize import minimize
