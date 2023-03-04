@@ -68,7 +68,7 @@ $$
 
 ### GRASP
 
-Now consider the instance *mt10*, a 10x10 problem from the literature. This problem has a known optimal solution of 933, although 950 is already a challenging target.
+Now consider the instance *mt10*, a 10x10 problem from the literature. This problem has a known optimal solution of 930, although 950 is already a challenging target.
 
 ```python
 from jobshop.params import job_params_from_json
@@ -81,25 +81,25 @@ params = job_params_from_json("./instances/orlib/mt10.json")
 
 ```python
 # Pure GRASP (fast solutions with lower quality)
-grasp = GRASP(params, alpha=(0.3, 0.9), seed=12)
+grasp = GRASP(params, alpha=(0.4, 1.0), seed=12)
 sol_grasp = grasp(25000, target=933, verbose=True)
 print(sol_grasp.C)
 ```
 
 ```python
 # GRASP-PR
-grasp_pr = GRASPPR(params, alpha=(0.3, 0.9), maxpool=20, post_opt=True, ifreq=5000)
-sol_pr = grasp_pr(25000, verbose=True, seed=12, target=933)
+grasp_pr = GRASPPR(params, alpha=(0.4, 1.0), maxpool=20, post_opt=True, ifreq=5000)
+sol_pr = grasp_pr(25000, verbose=True, seed=12, target=930)
 print(sol_pr.C)
 ```
 
-These configurations would return solutions with makespan of 998 for GRASP and 950 for GRASP-PR, although the latter would take several hours to be obtained.
+These configurations would return solutions with makespan of 998 for GRASP and 938 for GRASP-PR, although the latter would take several hours to be obtained.
 
 ```python
 sol_pr.plot()
 ```
 
-![jobshop_grasppr_plot](./data/grasp_pr_mt10_results_950.png)
+![jobshop_grasppr_plot](./data/grasp_pr_mt10_results_938.png)
 
 ### BRKGA
 
@@ -118,10 +118,10 @@ brkga = BRKGA(
     perc_elite=0.2,
     perc_mutants=0.1,
     bias=0.85,
-    eliminate_duplicates=PhenoDuplicates(min_diff=0.12),
+    eliminate_duplicates=PhenoDuplicates(min_diff=0.1),
 )
 problem = JobShopProblem(params, LSDecoder)
-res = minimize(problem, brkga, termination=TargetTermination(500, 933), verbose=True, seed=42)
+res = minimize(problem, brkga, termination=TargetTermination(1000, 930), verbose=True, seed=42)
 ```
 
 ```python
@@ -129,13 +129,13 @@ graph = problem.decoder.build_graph_from_string(res.X)
 print(graph.C)
 ```
 
-Using this configuration, BRKGA would return the good solution with makespan of 936, which would take more than half an hour, although good quality solutions (lesser than 970) could be found within a few minutes.
+Using this configuration, BRKGA would find the optimal solution within approximatedely 90 minutes, although good quality solutions (lesser than 970) could be found within a few minutes.
 
 ```python
 graph.plot()
 ```
 
-![jobshop_brkga_plot](./data/brkga_mt10_936.png)
+![jobshop_brkga_plot](./data/brkga_mt10_optimal.png)
 
 
 ## References
