@@ -53,10 +53,7 @@ class GRASP:
         Graph
             Solution
         """
-        S = Graph(
-            self.params.machines, self.params.jobs,
-            self.params.p_times, self.params.seq,
-        )
+        S = Graph(self.params)
         S = self.construction(S)
         calc_tails(S)
         get_critical(S)

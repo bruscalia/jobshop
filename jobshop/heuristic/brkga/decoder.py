@@ -7,24 +7,15 @@ from jobshop.heuristic.local_search import get_critical, local_search
 
 class Decoder(JobShopParams):
     
-    def __init__(self, machines, jobs, p_times, seq):
+    def __init__(self, params):
         """Decoder for Genetic Algorithms applied to the job-shop schedule problem
 
         Parameters
         ----------
-        machines : Iterable
-            Machines
-        
-        jobs : Iterable
-            Jobs
-        
-        p_times : dict
-            Duration of operations (m, j)
-        
-        seq : dict
-            Sequence of machines for job j
+        params : JobShopParams
+            Parameters that define the problem
         """
-        super().__init__(machines, jobs, p_times, seq)
+        super().__init__(params.machines, params.jobs, params.p_times, params.seq)
         _x = []
         for key, value in self.seq.items():
             _x.extend([key] * len(value))
@@ -90,7 +81,7 @@ class Decoder(JobShopParams):
             assigned[j] = assigned[j] + 1
         
         # Initialize graph
-        graph = Graph(self.machines, self.jobs, self.p_times, self.seq)
+        graph = Graph(self)
         for (m, j) in Q:
             graph.M[m].add_job(j)
         

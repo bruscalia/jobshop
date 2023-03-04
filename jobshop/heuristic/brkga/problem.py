@@ -8,16 +8,23 @@ from jobshop.heuristic.brkga.decoder import Decoder
 class JobShopProblem(ElementwiseProblem):
     
     def __init__(self, params: JobShopParams, decoder_class=Decoder):
+        """Jobshop problem in pymoo style
+
+        Parameters
+        ----------
+        params : JobShopParams
+            Parameters that define the problem
+        
+        decoder_class : class, optional
+            Class to isntantiate decoder, by default Decoder
+        """
         self.params = params
         n_var = 0
         for j, machines in self.params.seq.items():
             n_var = n_var + len(machines)
         xl = np.zeros(n_var)
         xu = np.ones(n_var)
-        self.decoder = decoder_class(
-            self.params.machines, self.params.jobs,
-            self.params.p_times, self.params.seq
-        )
+        self.decoder = decoder_class(params)
         super().__init__(elementwise=True, n_var=n_var, n_obj=1, xl=xl, xu=xu)
     
     def _evaluate(self, x, out, *args, **kwargs):
