@@ -81,19 +81,19 @@ params = job_params_from_json("./instances/orlib/mt10.json")
 
 ```python
 # Pure GRASP (fast solutions with lower quality)
-grasp = GRASP(params, alpha=(0.4, 1.0), seed=12)
-sol_grasp = grasp(25000, target=933, verbose=True)
+grasp = GRASP(params, alpha=(0.4, 1.0), seed=42)
+sol_grasp = grasp(100000, target=None, verbose=True)
 print(sol_grasp.C)
 ```
 
 ```python
 # GRASP-PR
-grasp_pr = GRASPPR(params, alpha=(0.4, 1.0), maxpool=20, post_opt=True, ifreq=5000)
-sol_pr = grasp_pr(25000, verbose=True, seed=12, target=930)
+grasp_pr = GRASPPR(params, alpha=(0.4, 1.0), maxpool=20, post_opt=True, ifreq=20000)
+sol_pr = grasp_pr(100000, verbose=True, seed=42, target=930)
 print(sol_pr.C)
 ```
 
-These configurations would return solutions with makespan of 998 for GRASP and 938 for GRASP-PR, although the latter would take several hours to be obtained.
+These configurations would return solutions with makespan of 980 for GRASP and 938 for GRASP-PR, although the latter would take several hours to be obtained.
 
 ```python
 sol_pr.plot()
