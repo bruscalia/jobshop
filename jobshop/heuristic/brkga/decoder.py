@@ -7,24 +7,15 @@ from jobshop.heuristic.local_search import get_critical, local_search
 
 class Decoder(JobShopParams):
     
-    def __init__(self, machines, jobs, p_times, seq):
+    def __init__(self, params):
         """Decoder for Genetic Algorithms applied to the job-shop schedule problem
 
         Parameters
         ----------
-        machines : Iterable
-            Machines
-        
-        jobs : Iterable
-            Jobs
-        
-        p_times : dict
-            Duration of operations (m, j)
-        
-        seq : dict
-            Sequence of machines for job j
+        params : JobShopParams
+            Parameters that define the problem
         """
-        super().__init__(machines, jobs, p_times, seq)
+        super().__init__(params.machines, params.jobs, params.p_times, params.seq)
         _x = []
         for key, value in self.seq.items():
             _x.extend([key] * len(value))
@@ -46,27 +37,28 @@ class Decoder(JobShopParams):
         """
         
         # Get sorted values of base vector
-        pheno = self.get_pheno(x)
-        pheno_hash = hash(str(pheno))
+        order = self.get_order(x)
+        order_hash = hash(str(order))
         
-        # Avoid re-calculation if pheno is known
-        if pheno_hash in self.known_solutions:
-            C = self.known_solutions[pheno_hash]
+        # Avoid re-calculation if order is known
+        if order_hash in self.known_solutions:
+            pheno, C = self.known_solutions[order_hash]
             
         else:
-            graph = self.build_graph(pheno)
+            graph = self.build_graph(order)
             C = graph.C
-            self.known_solutions[pheno_hash] = C
+            pheno = graph.pheno
+            self.known_solutions[order_hash] = pheno, C
         
         return pheno, x, C
     
-    def build_graph(self, pheno):
-        """Build and evaluate problem graph from phenotype
+    def build_graph(self, order):
+        """Build and evaluate problem graph from ordered operations
 
         Parameters
         ----------
-        pheno : numpy.array
-            Phenotype of solution
+        order : numpy.array
+            Order of operations
 
         Returns
         -------
@@ -82,14 +74,14 @@ class Decoder(JobShopParams):
         
         # Create a list of elements (m, j) to assign
         Q = []
-        for j in pheno:
+        for j in order:
             k = assigned[j]
             m = self.seq[j][k]
             Q.append((m, j))
             assigned[j] = assigned[j] + 1
         
         # Initialize graph
-        graph = Graph(self.machines, self.jobs, self.p_times, self.seq)
+        graph = Graph(self)
         for (m, j) in Q:
             graph.M[m].add_job(j)
         
@@ -98,10 +90,10 @@ class Decoder(JobShopParams):
         
         return graph
     
-    def get_pheno(self, x):
+    def get_order(self, x):
         idx = np.argsort(x)
-        pheno = self.base_vector[idx]
-        return pheno
+        order = self.base_vector[idx]
+        return order
     
     def build_graph_from_string(self, x):
         """Build and evaluate problem graph from string
@@ -116,40 +108,40 @@ class Decoder(JobShopParams):
         Graph
             Job-shop graph
         """
-        pheno = self.get_pheno(x)
-        return self.build_graph(pheno)
+        order = self.get_order(x)
+        return self.build_graph(order)
         
 
 class LSDecoder(Decoder):
     
     def decode(self, x):
         # Get sorted values of base vector
-        pheno = self.get_pheno(x)
-        pheno_hash = hash(str(pheno))
+        order = self.get_order(x)
+        order_hash = hash(str(order))
         
         # Avoid re-calculation if pheno is known
-        if pheno_hash in self.known_solutions:
-            C = self.known_solutions[pheno_hash]
-            x_new = x
+        if order_hash in self.known_solutions:
+            pheno, x_new, C = self.known_solutions[order_hash]
             
         else:
-            graph = self.build_graph(pheno)
+            graph = self.build_graph(order)
             C = graph.C
-            self.known_solutions[pheno_hash] = C
-        
             pheno = graph.pheno
+            order_new = graph.order
+  
             x_new = np.zeros_like(x)
-            for i in np.unique(pheno):
-                idx = np.flatnonzero(pheno == i)
+            for i in np.unique(order_new):
+                idx = np.flatnonzero(order_new == i)
                 x_new[idx] = x[idx]
             
-            pheno_hash = hash(str(pheno))
-            self.known_solutions[pheno_hash] = C
+            order_new_hash = hash(str(order_new))
+            self.known_solutions[order_hash] = pheno, x_new, C
+            self.known_solutions[order_new_hash] = pheno, x_new, C
         
         return pheno, x_new, C
     
-    def build_graph(self, pheno):
-        graph = super().build_graph(pheno)
+    def build_graph(self, order):
+        graph = super().build_graph(order)
         calc_tails(graph)
         get_critical(graph)
         return local_search(graph)

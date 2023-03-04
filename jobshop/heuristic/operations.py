@@ -35,8 +35,10 @@ class Machine:
     def __init__(
         self,
         key,
-        jobs=JobSequence([]),
+        jobs=None,
     ) -> None:
+        if jobs is None:
+            jobs = JobSequence()
         self.key = key
         self.jobs = jobs
     
@@ -44,39 +46,32 @@ class Machine:
         return str(self.__dict__)
     
     def add_job(self, job):
-        self.jobs = JobSequence(np.append(self.jobs, job))
+        self.jobs.append(job)
 
 
 class Graph(JobShopParams):
     
-    cmap = mpl.colormaps["Dark2"]
-    colors = cmap.colors
+    colors = mpl.colormaps["Dark2"].colors + mpl.colormaps["Set2"].colors
     
-    def __init__(self, machines, jobs, p_times, seq):
+    def __init__(self, params: JobShopParams):
         """Graph structure to job-shop problem
 
         Parameters
         ----------
-        machines : Iterable
-            Iterable of machine labels
-        
-        jobs : Iterable
-            Iterable of job labels
-        
-        p_times : dict
-            Dictionary with duration of each opeartion (m, j)
-        
-        seq : dict
-            Dictionary of sequence of machines per job
+        params : JobShopParams
+            Parameters that define the problem
         """
-        super().__init__(machines, jobs, p_times, seq)
+        super().__init__(params.machines, params.jobs, params.p_times, params.seq)
         self.M = {
-            m: Machine(m)
+            m: Machine(m, jobs=JobSequence())
             for m in self.machines
         }
         self.O = {}
         self._start_operations()
         self.V = sum(self.p_times[key] for key in self.p_times)
+    
+    def restart(self):
+        self.__init__(self)
     
     def _start_operations(self):
         for m in self.machines:
@@ -171,19 +166,23 @@ class Graph(JobShopParams):
         return copy.deepcopy(self)
     
     @property
-    def pheno(self):
+    def order(self):
         releases = np.array([o.release for o in self.O.values()])
         unordered = np.array([o.job for o in self.O.values()])
-        order = np.argsort(releases)
-        pheno = unordered[order]
-        return pheno
+        seq = np.argsort(releases)
+        order = unordered[seq]
+        return order
     
     @property
-    def signature(self):
+    def pheno(self):
         pheno = []
         for m in self.M.values():
             pheno = pheno + m.jobs
-        return hash(str(pheno))
+        return np.array(pheno)
+    
+    @property
+    def signature(self):
+        return hash(str(self.order))
     
     def plot(self, horizontal=True, figsize=[7, 3], dpi=100, colors=None):
         if horizontal:
